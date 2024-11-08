@@ -1,5 +1,12 @@
 return {
     {
+        "mfussenegger/nvim-jdtls",
+        dependencies = {
+            "mfussenegger/nvim-dap",
+        },
+    },
+
+    {
         "neovim/nvim-lspconfig",
         dependencies = {
             "williamboman/mason.nvim",
@@ -68,6 +75,10 @@ return {
                     -- WARN: This is not Goto Definition, this is Goto Declaration.
                     --  For example, in C this would take you to the header
                     map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+
+                    map('<leader>vd', vim.diagnostic.open_float, '[V]im [D]ignostic')
+                    map('[d', vim.diagnostic.goto_next, '[[]next [D]iagnostic')
+                    map(']d', vim.diagnostic.goto_prev, '[]]prev [D]iagnostic')
                 end,
             })
 
@@ -78,7 +89,6 @@ return {
                 {},
                 vim.lsp.protocol.make_client_capabilities(),
                 cmp_lsp.default_capabilities())
-            -- local capabilities = cmp_lsp.default_capabilities()
 
             require("luasnip.loaders.from_vscode").lazy_load()
             require("fidget").setup({})
@@ -87,9 +97,11 @@ return {
                 ensure_installed = {
                     "lua_ls",
                     "html",
-                    "tsserver",
+                    "ts_ls",
                     "emmet_ls",
                     "gopls",
+                    "sqlls",
+                    "jdtls",
                 },
                 handlers = {
                     function(server_name) -- default handler (optional)
@@ -104,17 +116,27 @@ return {
                             capabilities = capabilities,
                             settings = {
                                 Lua = {
+                                    runtime = {
+                                        version = "LuaJIT",
+                                    },
                                     diagnostics = {
-                                        globals = { "vim", "it", "describe", "before_each", "after_each" },
-                                    }
+                                        globals = { "vim" },
+                                    },
+                                    workspace = {
+                                        library = vim.api.nvim_get_runtime_file("", true),
+                                        checkThirdParty = false,
+                                    },
+                                    telemetry = {
+                                        enable = false,
+                                    },
                                 }
                             }
                         }
                     end,
 
-                    ["tsserver"] = function()
+                    ["ts_ls"] = function()
                         local lspconfig = require("lspconfig")
-                        lspconfig.tsserver.setup {
+                        lspconfig.ts_ls.setup {
                             capabilities = capabilities,
                         }
                     end,
@@ -139,18 +161,49 @@ return {
                         local lspconfig = require("lspconfig")
                         lspconfig.gopls.setup {
                             capabilities = capabilities,
-                            filetypes = { "go", "gomod", "gowork", "gotmpl" },
+                            filetypes = { "go", "gomod", "gowork", "gotmpl", "tmpl", "tmp.html" },
                             settings = {
                                 gopls = {
+                                    templateExtensions = { "gotmpl", "tmpl", "tmpl.html" },
                                     completeUnimported = true,
                                     usePlaceHolders = true,
                                     analyses = {
                                         unusedparams = true,
                                     },
+                                    hints = {
+                                        assignVariableTypes = true,
+                                        compositeLiteralFields = true,
+                                        compositeLiteralTypes = true,
+                                        constantValues = true,
+                                        functionTypeParameters = true,
+                                        parameterNames = true,
+                                        rangeVariableTypes = true,
+                                    },
                                 },
                             },
                         }
                     end,
+
+                    ["sqlls"] = function()
+                        local lspconfig = require("lspconfig")
+                        lspconfig.sqlls.setup {
+                            capabilities = capabilities,
+                            filetypes = { "sql", "mysql" },
+                        }
+                    end,
+
+                    ["clangd"] = function()
+                        local lspconfig = require("lspconfig")
+                        lspconfig.clangd.setup {
+                            capabilities = capabilities,
+                            settings = {
+                                clangd = {
+                                    fallbackFlags = { "--fallback-style=Google" },
+                                },
+                            },
+                        }
+                    end,
+
                 },
             })
 
@@ -171,10 +224,9 @@ return {
                 }),
                 sources = cmp.config.sources({
                     { name = 'nvim_lsp' },
-
                     { name = 'luasnip' }, -- For luasnip users.
-
                     { name = 'buffer' },
+                    { name = 'path' },
 
                     -- {
                     --     name = "html-css",
@@ -192,6 +244,13 @@ return {
                     --     }
                     -- }
                 })
+            })
+
+            cmp.setup.filetype({ 'sql' }, {
+                sources = {
+                    { name = 'vim-dadbod-completion' },
+                    { name = 'buffer' },
+                },
             })
 
             vim.diagnostic.config({

@@ -14,11 +14,11 @@ from kitty.tab_bar import (
 )
 
 opts = get_options()
-icon_fg = as_rgb(0x222436)
-icon_bg = as_rgb(0xc8d3f5)
+icon_fg = as_rgb(0xFFA066)
+icon_bg = as_rgb(0x6A9589)
 bat_text_color = as_rgb(0xffffff)
-clock_color = as_rgb(0x53E014)
-date_color = as_rgb(0x53E014)
+clock_color = as_rgb(0x98BB6C)
+date_color = clock_color
 SEPARATOR_SYMBOL, SOFT_SEPARATOR_SYMBOL = ("", "")
 RIGHT_MARGIN = 1
 REFRESH_TIME = 1
@@ -114,6 +114,7 @@ def draw_tab(
 ) -> int:
     global timer_id
     global right_status_length
+    max_title_length = 5
     if timer_id is None:
         timer_id = add_timer(_redraw_tab_bar, REFRESH_TIME, True)
     clock = datetime.now().strftime(" %H:%M")

@@ -1,7 +1,7 @@
 return {
     {
         "folke/noice.nvim",
-        event = "VeryLazy",
+        -- event = "VeryLazy",
         opts = {
         },
         dependencies = {
@@ -18,7 +18,6 @@ return {
                         ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
                     },
                 },
-                -- you can enable a preset for easier configuration
                 presets = {
                     bottom_search = true,         -- use a classic bottom cmdline for search
                     command_palette = true,       -- position the cmdline and popupmenu together
@@ -92,14 +91,77 @@ return {
         dependencies = {
             'nvim-tree/nvim-web-devicons'
         },
-        event = "VeryLazy",
-        opts = {
-            options = {
-                theme = "tokyonight",
-                component_separators = '',
-                section_separators = { left = '', right = '' },
-            },
-        },
+        -- event = "VeryLazy",
+        config = function()
+            require('lualine').setup {
+                sections = {
+                    lualine_c = {
+                        {
+                            'filename',
+                            path = 3,
+                            -- shorting_target = 40,
+                        },
+                    },
+                    lualine_x = {
+                        {
+                            require("noice").api.statusline.mode.get,
+                            cond = require("noice").api.statusline.mode.has,
+                            color = { fg = "#FFA066" },
+                        }
+                    },
+                },
+                options = {
+                    theme = function()
+                        local colors = {
+                            fujiWhite = "#DCD7BA",
+                            springGreen = "#98BB6C",
+                            crystalBlue = "#7E9CD8",
+                            waveAqua1 = "#6A9589",
+                            waveBlue1 = "#223249",
+                            oniViolet = "#957FB8",
+                            surimiOrange = "#FFA066",
+                            roninYellow = "#FF9E3B",
+                            background = "#141b23",
+                        }
+                        local theme = {
+                            normal = {
+                                a = { bg = colors.fujiWhite, fg = colors.background },
+                                b = { bg = colors.crystalBlue, fg = colors.background },
+                                c = { bg = colors.background, fg = colors.fujiWhite },
+                            },
+                            insert = {
+                                a = { bg = colors.springGreen, fg = colors.background },
+                                b = { bg = colors.waveAqua1, fg = colors.background },
+                                c = { bg = colors.background, fg = colors.fujiWhite },
+                            },
+                            visual = {
+                                a = { bg = colors.oniViolet, fg = colors.background },
+                                b = { bg = colors.waveAqua1, fg = colors.background },
+                                c = { bg = colors.background, fg = colors.fujiWhite },
+                            },
+                            replace = {
+                                a = { bg = colors.samuraiRed, fg = colors.background },
+                                b = { bg = colors.waveAqua1, fg = colors.background },
+                                c = { bg = colors.background, fg = colors.fujiWhite },
+                            },
+                            command = {
+                                a = { bg = colors.roninYellow, fg = colors.background },
+                                b = { bg = colors.waveAqua1, fg = colors.background },
+                                c = { bg = colors.background, fg = colors.fujiWhite },
+                            },
+                            inactive = {
+                                a = { bg = colors.fujiGray, fg = colors.background },
+                                b = { bg = colors.waveAqua1, fg = colors.background },
+                                c = { bg = colors.background, fg = colors.fujiWhite },
+                            },
+                        }
+                        return theme
+                    end,
+                    component_separators = '',
+                    section_separators = { left = '', right = '' },
+                },
+            }
+        end
     },
 
     {
@@ -138,8 +200,24 @@ return {
     -- Highlight todo, notes, etc in comments
     {
         'folke/todo-comments.nvim',
-        event = 'VimEnter',
         dependencies = { 'nvim-lua/plenary.nvim' },
         opts = { signs = false }
+    },
+
+    {
+        'folke/which-key.nvim',
+        event = 'vimEnter',
+        config = function()
+            local which_key = require('which-key')
+
+            which_key.setup()
+
+            which_key.register({
+                { "", group = "[J]ava" },
+                { "", desc = "<leader>J_", hidden = true },
+                -- { "<leader>J",  group = "[J]ava" },
+                -- { "<leader>J_", hidden = true },
+            })
+        end
     },
 }
